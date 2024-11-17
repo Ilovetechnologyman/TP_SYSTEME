@@ -5,42 +5,9 @@
 int BUF_SIZE = 1024;
 char *buffer=NULL;
 int ind= -1;
-
-
-/* 
-void mini_printf(char* p){
-    void * resultat = mini_malloc(sizeof(buffer),BUF_SIZE);
-    int j=0;
-    while(p[j] != '\0'){
-        j++; //compte les caractère
-    }
-    for(int i=0;i<BUF_SIZE;i++){
-        ((char *)resultat)[i] = p[i%j];
-        if(((char *)resultat)[i] == '\n' || ((char *)resultat)[i] == '\0'){
-            write(buffer,resultat,ind);
-            for(int k=0;k<ind;k++){
-                ((char *)resultat)[k] = '\0'; // on libère le tampon
-            }
-            ind = -1;
-        }
-        ind++;
-    } //le tampon est rempli 
-    if(ind == -1){
-        mini_exit();
-    }
-    else{
-        write(buffer,resultat,ind);
-        for(int k=0;k<ind;k++){
-            ((char *)resultat)[k] = '\0'; // on libère le tampon
-        }
-        mini_exit();
-    }
-}
-
-*/
 void mini_printf(char* p){
     if (ind == -1) {
-        buffer = mini_malloc(sizeof(* buffer),BUF_SIZE);
+        buffer = mini_calloc(sizeof(* buffer),BUF_SIZE);
         ind = 0;
     }
     int i=0;
@@ -71,7 +38,36 @@ void mini_printf(char* p){
         }
         ind = 0;
     }
-    mini_free(buffer);
     ind=-1;
-    mini_exit();
+    mini_free(buffer);
+}
+
+int mini_scanf(char * buffer,int size_buffer){
+    return read(1,buffer,size_buffer);
+}
+
+int mini_strlen(char *s){
+    int i=0;
+    while(*(s+i) != '\0'){
+        i++;
+    }
+    return i;
+}
+
+int mini_strcpy(char *s,char *d){
+    int i = 0;
+    while(*(d+i) != '\0'){
+        *(d+i) = *(s+i);
+    }
+    return i;
+}
+
+int mini_strcmp(char* s1, char* s2){
+    if(strlen(s1)==strlen(s2)){
+        return 0;
+    }
+    if(strlen(s1) > strlen(s2)){
+        return 1;
+    }
+    return 2;
 }

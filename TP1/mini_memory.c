@@ -5,22 +5,25 @@
 #include "debug.h"
 struct malloc_element * malloc_list = NULL; 
 
-void *mini_malloc(int size_element,int number_element){
-   void * element=  sbrk(size_element*number_element);
-   if(element == (void *) -1){
+void *mini_calloc(int size_element,int number_element){
+    void * element=  sbrk(size_element*number_element);
+    if(element == (void *) -1){
         exit(EXIT_FAILURE);
-   }
-   for(int i=0; i < size_element*number_element;i++){
+    }
+    for(int i=0; i < size_element*number_element;i++){
         ((char *)element)[i] = '\0';
     }
-    while(malloc_list != NULL){ 
-        if(malloc_list->statut == 0 && (malloc_list->taille >= size_element* number_element )){
-            malloc_list->statut  =1;
-            return malloc_list->element ;
+    struct malloc_element *temp = malloc_list;
+    while(temp!= NULL){ 
+        if(temp->statut == 0 && (temp->taille >= size_element* number_element )){
+           temp->taille = size_element* number_element;
+           temp->element = element;
+           temp->statut = 1;
+           return element;
         }
-        malloc_list = malloc_list->next_element;
+        temp = temp->next_element;
     }
-    
+
     malloc_element * tampon = sbrk(sizeof(malloc_element));
     tampon->element = element;
     tampon->taille = size_element*number_element;
@@ -31,25 +34,33 @@ void *mini_malloc(int size_element,int number_element){
 }
 
 void mini_free(void* ptr){
+    struct malloc_element * temp = malloc_list;
     if(ptr==NULL){
         printf("il n'y a rien a libérer ! \n");
-        exit(EXIT_FAILURE);
     }
-    while(malloc_list != NULL){
-        if(malloc_list->element == ptr){
-            malloc_list->statut = 0;
-            return ;
+    while(temp!= NULL){
+        if(temp->element == ptr){
+            temp->statut = 0;
+            return;
         }
-        malloc_list = malloc_list->next_element;
+        temp = temp->next_element;
     }
     printf("la partition n'a pas été trouvé \n");
-    exit(EXIT_FAILURE);
+    
 }
 
 
-void mini_exit(){
+void mini_exit(void){
+    struct malloc_element *temp = malloc_list;
+    while (temp != NULL) {
+        if(temp->statut == 1){
+            mini_free(temp);
+        }
+        temp = temp->next_element;
+    }
     exit(EXIT_SUCCESS);
-
 }
 // la fonction free() ne libère va vraiment la mémoire alouée mais l'adresse
 // qui fait référence avec le bloc de mémoire
+
+
