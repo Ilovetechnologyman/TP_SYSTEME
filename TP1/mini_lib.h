@@ -14,4 +14,5 @@ int mini_scanf(char * buffer,int size_buffer);
 int mini_strlen(char *s);
 int mini_strcpy(char *s,char *d);
 int mini_strcmp(char* s1, char* s2);
+void mini_perror(char * message);
 #endif

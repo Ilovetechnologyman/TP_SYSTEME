@@ -2,9 +2,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 int BUF_SIZE = 1024;
 char *buffer=NULL;
 int ind= -1;
+
 void mini_printf(char* p){
     if (ind == -1) {
         buffer = mini_calloc(sizeof(* buffer),BUF_SIZE);
@@ -58,6 +60,7 @@ int mini_strcpy(char *s,char *d){
     int i = 0;
     while(*(d+i) != '\0'){
         *(d+i) = *(s+i);
+        i++;
     }
     return i;
 }
@@ -70,4 +73,11 @@ int mini_strcmp(char* s1, char* s2){
         return 1;
     }
     return 2;
+}
+
+
+
+void mini_perror(char * message){
+    mini_printf(message);
+
 }

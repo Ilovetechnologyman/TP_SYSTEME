@@ -6,6 +6,7 @@
 struct malloc_element * malloc_list = NULL; 
 
 void *mini_calloc(int size_element,int number_element){
+    printf("on veut %d bytes de sbrk\n", size_element * number_element);
     void * element=  sbrk(size_element*number_element);
     if(element == (void *) -1){
         exit(EXIT_FAILURE);
@@ -25,6 +26,10 @@ void *mini_calloc(int size_element,int number_element){
     }
 
     malloc_element * tampon = sbrk(sizeof(malloc_element));
+    if (tampon == (void *)-1) {
+    perror("sbrk failed");
+    exit(EXIT_FAILURE);
+    }
     tampon->element = element;
     tampon->taille = size_element*number_element;
     tampon->statut = 1;
@@ -46,7 +51,6 @@ void mini_free(void* ptr){
         temp = temp->next_element;
     }
     printf("la partition n'a pas été trouvé \n");
-    
 }
 
 
@@ -54,7 +58,7 @@ void mini_exit(void){
     struct malloc_element *temp = malloc_list;
     while (temp != NULL) {
         if(temp->statut == 1){
-            mini_free(temp);
+            mini_free(temp->element);
         }
         temp = temp->next_element;
     }
