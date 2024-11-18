@@ -4,7 +4,7 @@ typedef struct malloc_element{
     void * element;
     int taille; 
     int statut;
-    void * next_element;
+    struct malloc_element * next_element;
 }malloc_element;
 void *mini_calloc(int size_element,int number_element);
 void mini_free(void* ptr);

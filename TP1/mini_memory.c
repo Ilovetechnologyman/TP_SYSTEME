@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "mini_lib.h"
-#include "debug.h"
+#include <debug.h>
 struct malloc_element * malloc_list = NULL; 
 
 void *mini_calloc(int size_element,int number_element){
