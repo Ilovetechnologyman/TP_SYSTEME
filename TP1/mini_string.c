@@ -4,10 +4,7 @@
 #include <string.h>
 #include <errno.h>
 
-#define EPERM "Operation non autorisée"
-#define ENOENT "Fichier ou repertoire inexistant"
-#define ESRCH " Processus inexistant"
-#define EBADF "Descripteur d'E/S non valide"
+
 extern int errno; //code erreur 
 int BUF_SIZE = 1024;
 char *buffer=NULL;
@@ -86,7 +83,7 @@ int mini_strcmp(char* s1, char* s2){
 void mini_perror(char * message){
     mini_printf(message);
     if(errno != 0){
-        mini_printf((char *)errno);
+        mini_printf("erreur");
     }
     else{
         mini_printf("il n'y a pas d'erreur systeme \n");
