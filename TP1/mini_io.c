@@ -52,5 +52,20 @@ MYFILE* mini_fopen(char* file, char mode){
 }
 
 int mini_fread(void * buffer,int size_element,int number_element, MYFILE * file){
-    
+    file->buffer_read = mini_calloc(size_element,IOBUFFER_SIZE);
+    file->ind_read = 0;
+    size_t decrementation = IOBUFFER_SIZE;
+    while(file->ind_read < number_element){
+        int sortie = read(file->fd,file->buffer_read + file->ind_read,decrementation);
+        if(sortie < 0){
+            mini_perror("read raté");
+        }
+        file->ind_read++;
+        decrementation = decrementation - (file->ind_read * size_element);
+        if(sortie == 0){
+            return file->ind_read;
+        }
+        mini_strcpy(file->buffer_read + file->ind_read,buffer + file->ind_read);
+    }
+    return file->ind_read;
 }
