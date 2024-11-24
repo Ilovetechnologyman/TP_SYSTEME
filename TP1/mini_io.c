@@ -47,18 +47,34 @@ MYFILE* mini_fopen(char* file, char mode){
     case 'r':
         fichier_retourner->fd = open(file,O_RDONLY);
         if(fichier_retourner->fd ==-1){
+            errno = 5;
             mini_perror("le fichier n'a pas pu être ouver \n");
             mini_exit();
         }
         break;
     case 'w':
         fichier_retourner->fd = open(file,O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+        if(fichier_retourner->fd ==-1){
+            errno = 5;
+            mini_perror("le fichier n'a pas pu être ouver \n");
+            mini_exit();
+        }
         break;
     case 'b':
         fichier_retourner->fd = open(file,O_RDWR);
+        if(fichier_retourner->fd ==-1){
+            errno = 5;
+            mini_perror("le fichier n'a pas pu être ouver \n");
+            mini_exit();
+        }
         break;
     case 'a':
         fichier_retourner->fd = open(file, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+        if(fichier_retourner->fd ==-1){
+            errno = 5;
+            mini_perror("le fichier n'a pas pu être ouver \n");
+            mini_exit();
+        }
         break;
     default:
         do {
@@ -77,6 +93,7 @@ int mini_fread(void *buffer, int size_element, int number_element, MYFILE *file)
     if (file->buffer_read == NULL) {
         file->buffer_read = mini_calloc(size_element, IOBUFFER_SIZE);
         if (file->buffer_read == NULL) {
+            errno =2;
             mini_perror("allocation ratée");
             return -1;
         }
@@ -110,6 +127,7 @@ int mini_fwrite(void *buffer, int size_element, int number_element, MYFILE *file
     if (file->buffer_write == NULL) {
         file->buffer_write = mini_calloc(size_element, IOBUFFER_SIZE);
         if (file->buffer_write == NULL) {
+            errno = 2;
             mini_perror("allocation ratée");
             return -1;
         }
@@ -123,6 +141,7 @@ int mini_fwrite(void *buffer, int size_element, int number_element, MYFILE *file
         if (file->ind_write >= IOBUFFER_SIZE) {
             int bytes_written = write(file->fd, file->buffer_write, IOBUFFER_SIZE);
             if (bytes_written < 0) {
+                errno =3;
                 mini_perror("écriture ratée");
                 return -1;
             }

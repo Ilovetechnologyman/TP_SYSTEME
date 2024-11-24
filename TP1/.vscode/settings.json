@@ -1,6 +1,8 @@
 {
     "C_Cpp.default.compilerPath": "/usr/bin/gcc",
     "files.associations": {
-        "mini_lib.h": "c"
+        "mini_lib.h": "c",
+        "stat.h": "c",
+        "stddef.h": "c"
     }
 }

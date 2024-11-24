@@ -2,9 +2,6 @@
 #include <stddef.h>
 
 
-#include "../mini_lib.h"
-#include <stddef.h>
-
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         mini_printf("Usage: <filename>\n");
