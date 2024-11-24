@@ -1,7 +1,5 @@
 #include "mini_lib.h"
 #include <unistd.h>
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
 
 
@@ -59,20 +57,21 @@ int mini_strlen(char *s){
     return i;
 }
 
-int mini_strcpy(char *s,char *d){
+int mini_strcpy(char *s, char *d) {
     int i = 0;
-    while(*(d+i) != '\0'){
-        *(d+i) = *(s+i);
+    while (*(s + i) != '\0') {
+        *(d + i) = *(s + i);
         i++;
     }
+    *(d + i) = '\0';
     return i;
 }
 
 int mini_strcmp(char* s1, char* s2){
-    if(strlen(s1)==strlen(s2)){
+    if(mini_strlen(s1)==mini_strlen(s2)){
         return 0;
     }
-    if(strlen(s1) > strlen(s2)){
+    if(mini_strlen(s1) > mini_strlen(s2)){
         return 1;
     }
     return 2;
