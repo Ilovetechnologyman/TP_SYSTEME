@@ -24,30 +24,44 @@ int main(int argc, char *argv[]) {
         mini_exit();
     }
     char buffer[2048];
-    int validation=0;
+    int validation = 0;
     int lines = 0;
-    mini_fread(buffer, sizeof(char), 2048, file);
-    int i,j;
-    for (i = 0; i < 2048; i++) {
-        if(buffer[i] == '\0'){
-            validation = 1; // on a atteint la fin du buffer
-            break; 
+    int total_read = 0;
+    int i, j;
+
+    while ((total_read = mini_fread(buffer, sizeof(char), 2048, file)) > 0) {
+        buffer[total_read] = '\0'; // Assurez-vous que le buffer est terminé par un caractère nul
+        for (i = 0; i < total_read; i++) {
+            if (buffer[i] == '\0') {
+                validation = 1; // on a atteint la fin du buffer
+                break;
+            }
+        }
+        if (!validation && total_read < 2048) {
+            validation = 1; // fin du fichier atteinte
+        }
+        if (validation) {
+            break;
         }
     }
-    if(!validation){ 
+
+    if (!validation) {
         mini_printf("Error: buffer overflow, file too large\n");
         mini_fclose(file);
         mini_exit();
     }
-    for(j= i-1; j>0;j--){
-        if(buffer[j] == '\n'){
+
+    for (j = i - 1; j > 0; j--) {
+        if (buffer[j] == '\n') {
             lines++; // on compte le nombre de lignes à reculons
         }
-        if(lines == num_lines){
+        if (lines == num_lines) {
             break;
         }
     }
-    mini_printf(&buffer[i-j]);
+
+    int k = j + 1;
+    mini_printf(&buffer[k]); // Utilisez %s pour afficher une chaîne de caractères
     mini_fclose(file);
     return 0;
 }

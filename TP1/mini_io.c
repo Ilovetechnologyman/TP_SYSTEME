@@ -11,7 +11,7 @@ typedef struct MYFILE{
     int ind_read;
     int ind_write;
 }MYFILE;
-
+extern int errno;
 FileNode *open_files = NULL;
 
 void add_open_file(MYFILE *file) {
@@ -52,7 +52,7 @@ MYFILE* mini_fopen(char* file, char mode){
         }
         break;
     case 'w':
-        fichier_retourner->fd = open(file,O_WRONLY);
+        fichier_retourner->fd = open(file,O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
         break;
     case 'b':
         fichier_retourner->fd = open(file,O_RDWR);
@@ -146,6 +146,7 @@ int mini_fflush(MYFILE *file) {
     }
     int bytes_written = write(file->fd, file->buffer_write, file->ind_write);
     if (bytes_written < 0) {
+        errno =3;
         mini_perror("écriture ratée");
         return -1;
     }
@@ -164,6 +165,7 @@ int mini_fclose(MYFILE * file){
     }
     int retour = close(file->fd);
     if(retour == -1){
+        errno= 6;
         mini_perror("le fichier n'a pas pu être fermé \n");
         return -1;
     }
@@ -175,6 +177,8 @@ int mini_fgetc(MYFILE *file) {
     char c;
     int bytes_read = mini_fread(&c, sizeof(char), 1, file);
     if (bytes_read <= 0) {
+        errno = 4;
+        mini_perror("Erreur: lecture ratée\n");
         return -1;
     }
     return (unsigned char)c;

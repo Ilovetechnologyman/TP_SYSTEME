@@ -3,11 +3,13 @@
 #include <stdio.h>
 #include "mini_lib.h"
 struct malloc_element * malloc_list = NULL; 
-
+extern int errno;
 void *mini_calloc(int size_element,int number_element){
     void * element=  sbrk(size_element*number_element);
     if(element == (void *) -1){
-        exit(EXIT_FAILURE);
+        errno = 2;
+        mini_perror("Erreur: pas de mémoire disponible\n");
+        mini_exit();
     }
     for(int i=0; i < size_element*number_element;i++){
         ((char *)element)[i] = '\0';
@@ -24,8 +26,9 @@ void *mini_calloc(int size_element,int number_element){
 
     malloc_element * tampon = sbrk(sizeof(malloc_element));
     if (tampon == (void *)-1) {
-    perror("sbrk failed");
-    exit(EXIT_FAILURE);
+        errno = 2;
+        mini_perror("Erreur: pas de mémoire disponible\n");
+        
     }
     tampon->element = element;
     tampon->taille = size_element*number_element;
@@ -51,27 +54,40 @@ void mini_free(void* ptr){
     printf("la partition n'a pas été trouvé \n");
 }
 
-extern struct FileNode *open_files; // Declare the external variable
+extern struct FileNode *open_files; 
 
 void mini_exit(void) {
-    // Flush all open files
+    
     struct FileNode *current = open_files;
     while (current) {
         mini_fflush(current->file);
         current = current->next;
     }
-    // Free all allocated memory
+   
     struct malloc_element *temp = malloc_list;
     while (temp != NULL) {
         if(temp->statut == 1){
+            errno = 2;
             mini_free(temp->element);
         }
         temp = temp->next_element;
     }
-    _exit(EXIT_FAILURE); // Use _exit to avoid calling mini_exit recursively
+    current = open_files;
+    while (current != NULL) {
+        if (mini_fclose(current->file) == -1) {
+            errno = 3;
+            mini_perror("Erreur: le fichier n'a pas pu être fermé\n");
+        }
+        current = current->next;
+    }
+    _exit(errno); 
 }
 
 void mini_memcpy(void *dest, const void *src, int n) {
+    if(dest == NULL || src == NULL){
+        errno = 1;
+        mini_perror("Erreur: pointeur NULL\n");
+    }
     char *csrc = (char *)src;
     char *cdest = (char *)dest;
     for (int i = 0; i < n; i++) {
@@ -84,13 +100,11 @@ void mini_memcpy(void *dest, const void *src, int n) {
 int mini_atoi(const char *str) {
     int result = 0;
     int sign = 1;
-
-    // Ignore leading whitespaces
     while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\v' || *str == '\f' || *str == '\r') {
         str++;
     }
 
-    // Check for sign
+    
     if (*str == '-') {
         sign = -1;
         str++;
@@ -98,7 +112,6 @@ int mini_atoi(const char *str) {
         str++;
     }
 
-    // Convert characters to integer
     while (*str >= '0' && *str <= '9') {
         result = result * 10 + (*str - '0');
         str++;
@@ -106,7 +119,6 @@ int mini_atoi(const char *str) {
 
     return sign * result;
 }
-// la fonction free() ne libère va vraiment la mémoire alouée mais l'adresse
-// qui fait référence avec le bloc de mémoire
+
 
 

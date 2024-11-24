@@ -1,9 +1,20 @@
 #include "mini_lib.h"
 #include <unistd.h>
-#include <errno.h>
+
+#define SUCCESS 0 
+#define NO_POINTER 1
+#define NO_MEMORY 2
+#define WRITE_ERROR 3
+#define READ_ERROR 4
+#define OPEN_ERROR 5
+#define CLOSE_ERROR 6
+#define FLUSH_ERROR 7
+#define NO_FILE 8
+#define OVERFLOW 9
 
 
-extern int errno; //code erreur 
+
+int errno =0; //code erreur 
 int BUF_SIZE = 1024;
 char *buffer=NULL;
 int ind= -1;
@@ -46,10 +57,18 @@ void mini_printf(char* p){
 }
 
 int mini_scanf(char * buffer,int size_buffer){
+    if(buffer == NULL){
+        errno = 1;
+        mini_perror("Erreur: pointeur NULL\n");
+    }
     return read(1,buffer,size_buffer);
 }
 
 int mini_strlen(char *s){
+    if(s == NULL){
+        errno = 1;
+        mini_perror("Erreur: pointeur NULL\n");
+    }
     int i=0;
     while(*(s+i) != '\0'){
         i++;
@@ -81,10 +100,36 @@ int mini_strcmp(char* s1, char* s2){
 
 void mini_perror(char * message){
     mini_printf(message);
-    if(errno != 0){
-        mini_printf("erreur");
-    }
-    else{
-        mini_printf("il n'y a pas d'erreur systeme \n");
+    switch(errno){
+        case NO_POINTER:
+            mini_printf("Erreur: pointeur NULL\n");
+            break;
+        case NO_MEMORY:
+            mini_printf("Erreur: pas de mémoire disponible\n");
+            break;
+        case WRITE_ERROR:
+            mini_printf("Erreur: écriture impossible\n");
+            break;
+        case READ_ERROR:
+            mini_printf("Erreur: lecture impossible\n");
+            break;
+        case OPEN_ERROR:
+            mini_printf("Erreur: ouverture impossible\n");
+            break;
+        case CLOSE_ERROR:
+            mini_printf("Erreur: fermeture impossible\n");
+            break;
+        case FLUSH_ERROR:
+            mini_printf("Erreur: vidage impossible\n");
+            break;
+        case NO_FILE:
+            mini_printf("Erreur: fichier inexistant\n");
+            break;
+        case OVERFLOW:
+            mini_printf("Erreur: débordement\n");
+            break;
+        default:
+            mini_printf("Erreur inconnue\n");
+            break;
     }
 }
