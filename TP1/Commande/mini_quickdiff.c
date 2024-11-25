@@ -35,7 +35,21 @@ int mini_memcmp(const void *buf1, const void *buf2, size_t count) {
     }
     return 0;
 }
-
+int mini_fgets(char *buf, int buf_size, struct MYFILE *file) {
+    int i = 0;
+    char c;
+    while (i < buf_size - 1) {
+        if (mini_fread(&c, 1, 1, file) <= 0) {
+            break;
+        }
+        buf[i++] = c;
+        if (c == '\n') {
+            break;
+        }
+    }
+    buf[i] = '\0';
+    return i;
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -52,23 +66,56 @@ int main(int argc, char *argv[]) {
 
     char src_buf[256], dest_buf[256];
     int src_read, dest_read;
+    int src_index = 0, dest_index = 0;
     int line_number = 1;
 
-    while ((src_read = mini_fread(src_buf, 1, sizeof(src_buf), src_fd)) > 0 &&
-           (dest_read = mini_fread(dest_buf, 1, sizeof(dest_buf), dest_fd)) > 0) {
-        if (mini_strcmp(src_buf, dest_buf) != 0) {
-            write(1, "Difference at line ", 19);
-            char line_str[10];
-            int len = mini_itoa(line_number, line_str);
-            write(1, line_str, len);
-            write(1, "\n", 1);
-            write(1, "File1: ", 7);
-            write(1, src_buf, src_read);
-            write(1, "\nFile2: ", 8);
-            write(1, dest_buf, dest_read);
-            write(1, "\n", 1);
+    while (1) {
+        src_read = mini_fread(src_buf, 1, sizeof(src_buf) - 1, src_fd);
+        dest_read = mini_fread(dest_buf, 1, sizeof(dest_buf) - 1, dest_fd);
+
+        if (src_read <= 0 && dest_read <= 0) {
+            break; // End of both files
         }
-        line_number++;
+
+        src_buf[src_read] = '\0';
+        dest_buf[dest_read] = '\0';
+
+        while (src_index < src_read && dest_index < dest_read) {
+            char *src_line_start = &src_buf[src_index];
+            char *dest_line_start = &dest_buf[dest_index];
+
+            // Find the end of the current line in both buffers
+            while (src_index < src_read && src_buf[src_index] != '\n') {
+                src_index++;
+            }
+            while (dest_index < dest_read && dest_buf[dest_index] != '\n') {
+                dest_index++;
+            }
+
+            // Null-terminate the lines
+            if (src_index < src_read) {
+                src_buf[src_index] = '\0';
+                src_index++;
+            }
+            if (dest_index < dest_read) {
+                dest_buf[dest_index] = '\0';
+                dest_index++;
+            }
+
+            // Compare the lines
+            if (mini_memcmp(src_line_start, dest_line_start, src_index - (src_line_start - src_buf)) != 0) {
+                write(1, src_line_start, src_index - (src_line_start - src_buf));
+                write(1, "\n", 1);
+                write(1, dest_line_start, dest_index - (dest_line_start - dest_buf));
+                write(1, "\n", 1);
+            }
+
+            line_number++;
+        }
+
+        // Reset indices for the next read
+        src_index = 0;
+        dest_index = 0;
     }
 
     mini_fclose(src_fd);

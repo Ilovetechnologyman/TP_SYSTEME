@@ -62,6 +62,7 @@ int main(int argc, char *argv[]) {
 
     int k = j + 1;
     mini_printf(&buffer[k]); // Utilisez %s pour afficher une chaîne de caractères
+    mini_printf("\n");
     mini_fclose(file);
     return 0;
 }
