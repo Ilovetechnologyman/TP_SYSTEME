@@ -10,6 +10,7 @@ typedef struct MYFILE{
     void * buffer_write;
     int ind_read;
     int ind_write;
+    int read_max;
 }MYFILE;
 extern int errno;
 FileNode *open_files = NULL;
@@ -93,30 +94,31 @@ int mini_fread(void *buffer, int size_element, int number_element, MYFILE *file)
     if (file->buffer_read == NULL) {
         file->buffer_read = mini_calloc(size_element, IOBUFFER_SIZE);
         if (file->buffer_read == NULL) {
-            errno =2;
+            errno = 2;
             mini_perror("allocation ratée");
             return -1;
         }
         file->ind_read = 0;
+        file->read_max = 0;
     }
-    char *output_buffer = (char *) buffer;
-    int bytes_read = 0;
+    char *output_buffer = (char *)buffer;
     int total_bytes_read = 0;
     while (total_bytes_read < number_element * size_element) {
-        if (file->ind_read == 0 || file->ind_read >= bytes_read) {
-            bytes_read = read(file->fd, file->buffer_read, IOBUFFER_SIZE);
-            if (bytes_read <= 0) {
+        if (file->ind_read >= file->read_max) {
+            file->read_max = read(file->fd, file->buffer_read, IOBUFFER_SIZE);
+            if (file->read_max <= 0) {
                 break; // End of file or error
             }
             file->ind_read = 0;
         }
-        int bytes_to_copy = (total_bytes_read + (bytes_read - file->ind_read) > number_element * size_element) ? (number_element * size_element - total_bytes_read) : (bytes_read - file->ind_read);
+        int bytes_to_copy = (total_bytes_read + (file->read_max - file->ind_read) > number_element * size_element)
+                            ? (number_element * size_element - total_bytes_read)
+                            : (file->read_max - file->ind_read);
         mini_memcpy(output_buffer + total_bytes_read, (char *)file->buffer_read + file->ind_read, bytes_to_copy);
         file->ind_read += bytes_to_copy;
         total_bytes_read += bytes_to_copy;
     }
-    file->ind_read = total_bytes_read;
-    return file->ind_read;
+    return total_bytes_read / size_element;
 }
 
 
